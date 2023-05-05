@@ -3,12 +3,12 @@ use super::*;
 #[test]
 fn serialize_init_msg() {
     let msg = Message {
-        src: "n1",
-        dst: "n2",
+        src: "n1".into(),
+        dst: "n2".into(),
         body: Body::Init {
             msg_id: 1,
-            node_id: "n2",
-            node_ids: vec!["n2", "n3"],
+            node_id: "n2".into(),
+            node_ids: vec!["n2".into(), "n3".into()],
         },
     };
 
@@ -21,8 +21,8 @@ fn serialize_init_msg() {
 #[test]
 fn serialize_init_ok_msg() {
     let msg = Message {
-        src: "n2",
-        dst: "n1",
+        src: "n2".into(),
+        dst: "n1".into(),
         body: Body::InitOk { in_reply_to: 1 },
     };
 

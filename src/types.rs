@@ -2,6 +2,9 @@ use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
 
+///
+/// Format for incoming/outgoing messages from the node
+///
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Message<'a> {
@@ -11,6 +14,9 @@ pub struct Message<'a> {
     pub body: Body<'a>,
 }
 
+///
+/// Defines the payload for any of these messages
+///
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 #[serde(tag = "type")]
@@ -39,6 +45,9 @@ pub enum Body<'a> {
     },
 }
 
+///
+/// Allows error codes to be indicated as enum variants
+///
 #[derive(Clone, Debug, Copy)]
 #[repr(u8)]
 pub enum ErrorCode {

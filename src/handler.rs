@@ -4,7 +4,10 @@ use serde_json::{de::IoRead, StreamDeserializer};
 
 use crate::types;
 
-pub fn executor<'a>(machine: impl Machine) -> anyhow::Result<()>
+/// An executor to provide input and output attachments for `Machine`
+/// Converts `stdin` into `StreamDeserializer`
+/// And provides `stdout` stream to `Machine` `handle`
+pub fn executor(machine: impl Machine) -> anyhow::Result<()>
 where
 {
     let stdin = std::io::stdin().lock();
@@ -19,6 +22,9 @@ pub type JsonStreamDe<'de, 'a> =
 
 pub type JsonSer<'a> = io::StdoutLock<'a>;
 
+/// Trait to provide abstraction for node, to define specific behaviour,
+/// provides abstraction over how the machine should run and how the machine is executed.
+/// Allows, one machine to execute multiple machines
 pub trait Machine {
     fn run(&mut self, input: JsonStreamDe, output: JsonSer) -> anyhow::Result<()>;
 
