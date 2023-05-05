@@ -6,6 +6,9 @@ use crate::{
     utils::{error::Consume, io_ops::JsonWrite},
 };
 
+///
+/// Node Created for the Echo Challenge
+///
 #[derive(Default)]
 pub struct EchoNode {
     node_name: Option<String>,

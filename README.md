@@ -5,11 +5,11 @@ This is my personalized solution to distributed systems problem from [maelstrom]
 ## Checklist
 
 - [x] Add test cases for function
-- [ ] Add documentation for functions and utils
+- [x] Add documentation for functions and utils
 
 
 
 
 ## Challenge Completion
 
-- [x] Echo Challenge [maelstrom#1](https://fly.io/dist-sys/1) [[v1]](https://github.com/NishantJoshi00/mobi/tree/v1)
+- [x] [[v1]](https://github.com/NishantJoshi00/mobi/tree/v1) Echo Challenge [maelstrom#1](https://fly.io/dist-sys/1) 
