@@ -48,18 +48,20 @@ pub trait Machine {
 
     fn handshake<'a>(&mut self, input: types::Message<'a>) -> anyhow::Result<types::Message<'a>> {
         Ok(match input.body {
-            types::Body::Init {
-                msg_id, node_id, ..
-            } => {
-                self.set_state(State::Id { id: node_id });
-                types::Message {
-                    src: input.dst,
-                    dst: input.src,
-                    body: types::Body::InitOk {
-                        in_reply_to: msg_id,
-                    },
+            types::Body::Request { msg_id, body } => match body {
+                types::RequestBody::Init { node_id, .. } => {
+                    self.set_state(State::Id { id: node_id });
+                    types::Message {
+                        src: input.dst,
+                        dst: input.src,
+                        body: types::Body::Response {
+                            in_reply_to: msg_id,
+                            body: types::ResponseBody::InitOk {},
+                        },
+                    }
                 }
-            }
+                msg => anyhow::bail!("Invalid message for handshake: {:?}", msg),
+            },
             msg => anyhow::bail!("Invalid message for handshake: {:?}", msg),
         })
     }

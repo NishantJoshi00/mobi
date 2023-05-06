@@ -1,8 +1,8 @@
-use anyhow::Context;
+use anyhow::{bail, Context};
 
 use crate::{
     handler::{self, Machine},
-    types::{Body, Message},
+    types::{Message, RequestBody, ResponseBody},
     utils::{error::Consume, io_ops::JsonWrite},
 };
 
@@ -38,17 +38,9 @@ impl Machine for EchoNode {
 
 impl EchoNode {
     fn step<'a>(&mut self, input: Message<'a>) -> anyhow::Result<Message<'a>> {
-        Ok(match input.body {
-            Body::Echo { msg_id, echo } => Message {
-                body: Body::EchoOk {
-                    msg_id,
-                    in_reply_to: msg_id,
-                    echo,
-                },
-                src: input.dst,
-                dst: input.src,
-            },
-            msg => anyhow::bail!("Invalid message received: {:?}", msg),
+        input.respond(|_msg_id, body| match body {
+            RequestBody::Echo { echo } => Ok(ResponseBody::EchoOk { echo }),
+            msg => bail!("invalid message received: {:?}", msg),
         })
     }
 }

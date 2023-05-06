@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use anyhow::bail;
 use serde::{Deserialize, Serialize};
 
 ///
@@ -14,42 +15,65 @@ pub struct Message<'a> {
     pub body: Body<'a>,
 }
 
-///
-/// Defines the payload for any of these messages
-///
+impl<'a> Message<'a> {
+    pub fn respond(
+        self,
+        callback: impl FnOnce(usize, RequestBody<'a>) -> anyhow::Result<ResponseBody<'a>>,
+    ) -> anyhow::Result<Message<'a>> {
+        Ok(Message {
+            src: self.dst,
+            dst: self.src,
+            body: match self.body {
+                Body::Request { msg_id, body } => Body::Response {
+                    in_reply_to: msg_id,
+                    body: callback(msg_id, body)?,
+                },
+                msg => bail!("Invalid request received: {:?}", msg),
+            },
+        })
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
-#[serde(tag = "type")]
+#[serde(untagged)]
 pub enum Body<'a> {
-    Init {
+    Request {
         msg_id: usize,
+        #[serde(flatten)]
+        body: RequestBody<'a>,
+    },
+    Response {
+        in_reply_to: usize,
+        #[serde(flatten)]
+        body: ResponseBody<'a>,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(tag = "type")]
+pub enum RequestBody<'a> {
+    Init {
         node_id: Cow<'a, str>,
         node_ids: Vec<Cow<'a, str>>,
     },
-    InitOk {
-        in_reply_to: usize,
-    },
+    // Messages For Echo Challenge
     Echo {
-        msg_id: usize,
         echo: Cow<'a, str>,
     },
-    EchoOk {
-        msg_id: usize,
-        in_reply_to: usize,
-        echo: Cow<'a, str>,
-    },
-    Error {
-        in_reply_to: usize,
-        code: ErrorCode,
-        text: Cow<'a, str>,
-    },
-    Generate {
-        msg_id: usize,
-    },
-    GenerateOk {
-        id: Cow<'a, str>,
-        in_reply_to: usize,
-    },
+    // Messages For Generate Challenge
+    Generate {},
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(tag = "type")]
+pub enum ResponseBody<'a> {
+    InitOk {},
+    Error { code: ErrorCode, text: Cow<'a, str> },
+    EchoOk { echo: Cow<'a, str> },
+    GenerateOk { id: Cow<'a, str> },
 }
 
 ///
@@ -110,19 +134,6 @@ impl<'de> Deserialize<'de> for ErrorCode {
         match ErrorCode::from(u8::deserialize(deserializer)?) {
             Some(value) => Ok(value),
             None => Err(serde::de::Error::custom("Failed to get the variant")),
-        }
-    }
-}
-
-impl<'a> Body<'a> {
-    #[allow(dead_code)]
-    fn get_msg_id(&self) -> Option<usize> {
-        match self {
-            Body::Init { msg_id, .. }
-            | Body::Echo { msg_id, .. }
-            | Body::EchoOk { msg_id, .. }
-            | Body::Generate { msg_id } => Some(*msg_id),
-            Body::InitOk { .. } | Body::Error { .. } | Self::GenerateOk { .. } => None,
         }
     }
 }
