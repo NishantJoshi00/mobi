@@ -43,6 +43,13 @@ pub enum Body<'a> {
         code: ErrorCode,
         text: Cow<'a, str>,
     },
+    Generate {
+        msg_id: usize,
+    },
+    GenerateOk {
+        id: Cow<'a, str>,
+        in_reply_to: usize,
+    },
 }
 
 ///
@@ -111,10 +118,11 @@ impl<'a> Body<'a> {
     #[allow(dead_code)]
     fn get_msg_id(&self) -> Option<usize> {
         match self {
-            Body::Init { msg_id, .. } | Body::Echo { msg_id, .. } | Body::EchoOk { msg_id, .. } => {
-                Some(*msg_id)
-            }
-            Body::InitOk { .. } | Body::Error { .. } => None,
+            Body::Init { msg_id, .. }
+            | Body::Echo { msg_id, .. }
+            | Body::EchoOk { msg_id, .. }
+            | Body::Generate { msg_id } => Some(*msg_id),
+            Body::InitOk { .. } | Body::Error { .. } | Self::GenerateOk { .. } => None,
         }
     }
 }

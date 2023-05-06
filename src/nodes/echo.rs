@@ -29,26 +29,14 @@ impl Machine for EchoNode {
             Ok(())
         })
     }
+    fn set_state(&mut self, state: handler::State) {
+        match state {
+            handler::State::Id { id } => self.node_name = Some(id.into()),
+        }
+    }
 }
 
 impl EchoNode {
-    fn handshake<'a>(&mut self, input: Message<'a>) -> anyhow::Result<Message<'a>> {
-        Ok(match input.body {
-            Body::Init {
-                msg_id, node_id, ..
-            } => {
-                self.node_name = Some(node_id.to_string());
-                Message {
-                    src: input.dst,
-                    dst: input.src,
-                    body: Body::InitOk {
-                        in_reply_to: msg_id,
-                    },
-                }
-            }
-            msg => anyhow::bail!("Invalid message for handshake: {:?}", msg),
-        })
-    }
     fn step<'a>(&mut self, input: Message<'a>) -> anyhow::Result<Message<'a>> {
         Ok(match input.body {
             Body::Echo { msg_id, echo } => Message {
@@ -60,7 +48,6 @@ impl EchoNode {
                 src: input.dst,
                 dst: input.src,
             },
-            Body::Init { .. } => self.handshake(input)?,
             msg => anyhow::bail!("Invalid message received: {:?}", msg),
         })
     }
