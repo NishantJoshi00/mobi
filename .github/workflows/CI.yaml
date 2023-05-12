@@ -1,0 +1,89 @@
+name: Maelstrom
+
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+
+  formatting:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - name: Run fmt check
+        run: cargo +nightly fmt --all --check
+  static-testing:
+    name: Testing Project
+    strategy:
+      matrix:
+        os: [ "ubuntu-latest" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Run clippy 
+        run: |
+          cargo clippy --features echo -- -D warnings
+          cargo clippy --features generate -- -D warnings
+      - name: Run tests
+        run: |
+          cargo test --features echo
+          cargo test --features generate
+
+
+  activ-testing:
+    name: Testing Maelstrom
+    needs: [formatting, static-testing]
+    strategy:
+      matrix:
+        problem: [ "echo", "generate" ]
+        include:
+          - problem: echo
+            build: cargo build --release --features echo
+            test: ./maelstrom/maelstrom test -w echo --bin target/release/mobi --node-count 1 --time-limit 10
+          - problem: generate
+            build: cargo build --release --features generate
+            test: ./maelstrom/maelstrom test -w unique-ids --bin target/release/mobi --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'oracle'
+          java-version: '17' 
+
+      # - uses: awalsh128/cache-apt-pkgs-action@latest
+      #   with:
+      #     packages: graphviz gnuplot
+      #     version: 1.0
+      - run: sudo apt update && sudo apt install graphviz gnuplot -y
+
+      - name: Build Project
+        run: ${{ matrix.build }}
+      - name: Install Maelstrom
+        run: |
+          wget --quiet https://github.com/jepsen-io/maelstrom/releases/download/v0.2.3/maelstrom.tar.bz2
+          tar -xf maelstrom.tar.bz2
+      - name: Run Test
+        run: ${{ matrix.test }}
+          
+

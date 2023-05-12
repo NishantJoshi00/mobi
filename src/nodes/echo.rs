@@ -58,7 +58,7 @@ mod tests {
         let out = serde_json::to_string(&out_msg).unwrap();
         assert_eq!(
             out,
-            "{\"src\":\"n1\",\"dest\":\"c1\",\"body\":{\"type\":\"echo_ok\",\"msg_id\":1,\"in_reply_to\":1,\"echo\":\"Please echo 35\"}}"
+            "{\"src\":\"n1\",\"dest\":\"c1\",\"body\":{\"in_reply_to\":1,\"type\":\"echo_ok\",\"echo\":\"Please echo 35\"}}"
         );
     }
 }
