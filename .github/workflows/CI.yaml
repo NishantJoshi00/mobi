@@ -14,12 +14,12 @@ jobs:
     name: Formatting Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Run fmt check
         run: cargo +nightly fmt --all --check
   static-testing:
@@ -29,12 +29,12 @@ jobs:
         os: [ "ubuntu-latest" ]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Run clippy 
         run: |
           cargo clippy --features echo -- -D warnings
@@ -60,8 +60,6 @@ jobs:
             test: ./maelstrom/maelstrom test -w unique-ids --bin target/release/mobi --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -70,12 +68,10 @@ jobs:
         with:
           distribution: 'oracle'
           java-version: '17' 
-
-      # - uses: awalsh128/cache-apt-pkgs-action@latest
-      #   with:
-      #     packages: graphviz gnuplot
-      #     version: 1.0
       - run: sudo apt update && sudo apt install graphviz gnuplot -y
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Build Project
         run: ${{ matrix.build }}
