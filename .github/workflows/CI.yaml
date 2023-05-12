@@ -78,7 +78,7 @@ jobs:
       - name: Install Maelstrom
         run: |
           wget --quiet https://github.com/jepsen-io/maelstrom/releases/download/v0.2.3/maelstrom.tar.bz2
-          tar -xf maelstrom.tar.bz2
+          tar -xvf maelstrom.tar.bz2
       - name: Run Test
         run: ${{ matrix.test }}
           
