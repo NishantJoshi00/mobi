@@ -11,10 +11,12 @@ use crate::{types, utils::io_ops::JsonWrite};
 pub fn executor(machine: impl Machine) -> anyhow::Result<()>
 where
 {
+    eprintln!("[log] connecting to I/O");
     let stdin = std::io::stdin().lock();
     let input_stream = serde_json::Deserializer::from_reader(stdin).into_iter();
     let output_stream = std::io::stdout().lock();
 
+    eprintln!("[log] executing handler");
     machine.handle(input_stream, output_stream)
 }
 
@@ -41,13 +43,15 @@ pub trait Machine {
             })
             .transpose()?
             .ok_or(anyhow!("Failed while making handshake"))?;
+        eprintln!("[log] handshake complete");
         self.run(input, output)
     }
 
     fn set_state(&mut self, state: State);
 
     fn handshake<'a>(&mut self, input: types::Message<'a>) -> anyhow::Result<types::Message<'a>> {
-        Ok(match input.body {
+        eprintln!("handshake request: {:?}", input);
+        let output = Ok(match input.body {
             types::Body::Request { msg_id, body } => match body {
                 types::RequestBody::Init { node_id, .. } => {
                     self.set_state(State::Id { id: node_id });
@@ -63,7 +67,9 @@ pub trait Machine {
                 msg => anyhow::bail!("Invalid message for handshake: {:?}", msg),
             },
             msg => anyhow::bail!("Invalid message for handshake: {:?}", msg),
-        })
+        });
+        eprintln!("handshake response: {:?}", output);
+        output
     }
 }
 

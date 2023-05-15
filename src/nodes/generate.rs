@@ -22,7 +22,7 @@ impl Machine for GenerateNode {
     ) -> anyhow::Result<()> {
         inputs.try_for_each(|msg| {
             self.step(msg?)
-                .context("Failed while handline request")
+                .context("Failed while handling request")
                 .consume()
                 .map(|value| value.write_to_writer(&mut output))
                 .transpose()?;
@@ -39,32 +39,6 @@ impl Machine for GenerateNode {
 
 impl GenerateNode {
     fn step<'a>(&mut self, input: Message<'a>) -> anyhow::Result<Message<'a>> {
-        // match input.body {
-        //     Body::Request { msg_id, body } => match body {
-        //         crate::types::RequestBody::Generate {} => {
-        //             let data = digest(format!("{} {}", msg_id, UNIX_EPOCH.elapsed()?.as_millis()));
-        //             Ok(Message {
-        //                 src: input.dst,
-        //                 dst: input.src,
-        //                 body: Body::Response {
-        //                     in_reply_to: msg_id,
-        //                     body: crate::types::ResponseBody::GenerateOk {
-        //                         id: format!(
-        //                             "{}-{}",
-        //                             self.node_name.as_ref().unwrap_or(&"0".to_string()),
-        //                             data
-        //                         )
-        //                         .into(),
-        //                     },
-        //                 },
-        //             })
-        //         }
-        //         _ => bail!("Invalid message received"),
-        //     },
-
-        //     _ => bail!("Invalid message received"),
-        // }
-
         input.respond(|msg_id, body| match body {
             types::RequestBody::Generate {} => {
                 let data = digest(format!("{} {}", msg_id, UNIX_EPOCH.elapsed()?.as_millis()));

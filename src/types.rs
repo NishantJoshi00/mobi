@@ -1,4 +1,7 @@
-use std::borrow::Cow;
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+};
 
 use anyhow::bail;
 use serde::{Deserialize, Serialize};
@@ -64,6 +67,14 @@ pub enum RequestBody<'a> {
     },
     // Messages For Generate Challenge
     Generate {},
+    // Message for Broadcast Challenge
+    Broadcast {
+        message: usize,
+    },
+    Read {},
+    Topology {
+        topology: HashMap<Cow<'a, str>, HashSet<Cow<'a, str>>>,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -74,6 +85,9 @@ pub enum ResponseBody<'a> {
     Error { code: ErrorCode, text: Cow<'a, str> },
     EchoOk { echo: Cow<'a, str> },
     GenerateOk { id: Cow<'a, str> },
+    BroadcastOk {},
+    ReadOk { messages: Vec<usize> },
+    TopologyOk {},
 }
 
 ///

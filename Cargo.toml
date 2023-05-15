@@ -5,8 +5,11 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
+default = []
+broadcast-a = []
 echo = []
-generate =[]
+generate = []
+
 
 [dependencies]
 serde = { version = "1.0.162", features = [ "derive" ] }

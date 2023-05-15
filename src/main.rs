@@ -13,6 +13,10 @@ fn main() -> anyhow::Result<()> {
         {
             nodes::generate::GenerateNode::default()
         }
+        #[cfg(feature = "broadcast-a")]
+        {
+            nodes::broadcast::BroadcastNode::default()
+        }
     };
 
     handler::executor(machine)
