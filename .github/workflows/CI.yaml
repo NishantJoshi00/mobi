@@ -60,7 +60,7 @@ jobs:
             test: ./maelstrom/maelstrom test -w unique-ids --bin target/release/mobi --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
           - problem: broadcast-a
             build: cargo build --release --features broadcast-a
-            test: ./maelstrom test -w broadcast --bin target/release/mobi --node-count 1 --time-limit 20 --rate 10
+            test: ./maelstrom/maelstrom test -w broadcast --bin target/release/mobi --node-count 1 --time-limit 20 --rate 10
     runs-on: ubuntu-latest
     steps:
 
